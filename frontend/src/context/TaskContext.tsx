@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, type ReactNode, useEffect } from "react";
 import type{ Task, Column, Id } from "../types/types";
+import * as api from '../lib/api';
 
 interface TaskContextType {
   tasks: Task[];
@@ -13,10 +14,8 @@ interface TaskContextType {
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 export const TaskProvider = ({ children }: { children: ReactNode }) => {
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    const saved = localStorage.getItem("kanban-tasks");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const columns: Column[] = [
     { id: "todo", title: "To Do" },
@@ -25,8 +24,18 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   ];
 
   useEffect(() => {
-    localStorage.setItem("kanban-tasks", JSON.stringify(tasks));
-  }, [tasks]);
+    const getTasks = async() =>{
+      try{
+        const res = await api.getAllTasks();
+        setTasks(res.data);
+        setIsLoading(false);
+      }catch(err){
+        console.error("Failed to fetch tasks ",err);
+        setIsLoading(false);
+      }
+    };
+    getTasks();
+  }, []);
 
   const addTask = (columnId: Id) => {
     const newTask: Task = { id: crypto.randomUUID(), columnId, content: "New Task" };

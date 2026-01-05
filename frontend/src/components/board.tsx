@@ -1,7 +1,7 @@
 import { arrayMove } from "@dnd-kit/sortable";
 import type{ Task } from "../types/types";
 import { useTasks } from "../context/TaskContext";
-import KanbanColumn from "./column";
+import KanbanColumn from "./Column";
 import { DndContext, DragOverlay, type DragEndEvent, PointerSensor, useSensor, useSensors, closestCorners } from "@dnd-kit/core";
 import { useState } from "react";
 import TaskCard from "./TaskCard";
