@@ -12,7 +12,7 @@ export function getAllTasks(){
 }
 
 export function createTask(task:Task){
-    return api.post('/tasks/',task);
+    return api.post('/task/create',task);
 }
 
 export function deleteTask(id: Id){

@@ -1,10 +1,11 @@
 import { createContext, useContext, useState, type ReactNode, useEffect } from "react";
-import type{ Task, Column, Id } from "../types/types";
+import type { Task, Column, Id } from "../types/types";
 import * as api from '../lib/api';
 
 interface TaskContextType {
   tasks: Task[];
   columns: Column[];
+  isLoading: boolean;
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
   addTask: (columnId: Id) => void;
   updateTask: (id: Id, content: string) => void;
@@ -24,34 +25,49 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   ];
 
   useEffect(() => {
-    const getTasks = async() =>{
-      try{
+    const getTasks = async () => {
+      try {
         const res = await api.getAllTasks();
         setTasks(res.data);
-        setIsLoading(false);
-      }catch(err){
-        console.error("Failed to fetch tasks ",err);
+      } catch (err) {
+        console.error("Failed to fetch tasks", err);
+      } finally {
         setIsLoading(false);
       }
     };
     getTasks();
-  }, []);
+  }, []); 
 
-  const addTask = (columnId: Id) => {
-    const newTask: Task = { id: crypto.randomUUID(), columnId, content: "New Task" };
-    setTasks([...tasks, newTask]);
+  const addTask = async (columnId: Id) => {
+    const newTask: Task = { id: crypto.randomUUID(), columnId: columnId as string, content: "New Task" };
+    try {
+      await api.createTask(newTask);
+      setTasks(prev => [...prev, newTask]);
+    } catch (err) {
+      alert("Error saving task to database");
+    }
   };
 
-  const updateTask = (id: Id, content: string) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, content } : t));
+  const updateTask = async (id: Id, content: string) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, content } : t));
+    try {
+      await api.updateTask(id, { content });
+    } catch (err) {
+      console.error("Failed to update task content", err);
+    }
   };
 
-  const deleteTask = (id: Id) => {
-    setTasks(tasks.filter(t => t.id !== id));
+  const deleteTask = async (id: Id) => {
+    setTasks(prev => prev.filter(t => t.id !== id));
+    try {
+      await api.deleteTask(id);
+    } catch (err) {
+      console.error("Failed to delete task", err);
+    }
   };
 
   return (
-    <TaskContext.Provider value={{ tasks, setTasks, columns, addTask, updateTask, deleteTask }}>
+    <TaskContext.Provider value={{ tasks, setTasks, columns, addTask, updateTask, deleteTask, isLoading }}>
       {children}
     </TaskContext.Provider>
   );
