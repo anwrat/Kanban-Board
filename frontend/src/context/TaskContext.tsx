@@ -4,6 +4,7 @@ import type{ Task, Column, Id } from "../types/types";
 interface TaskContextType {
   tasks: Task[];
   columns: Column[];
+  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
   addTask: (columnId: Id) => void;
   updateTask: (id: Id, content: string) => void;
   deleteTask: (id: Id) => void;
@@ -41,7 +42,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <TaskContext.Provider value={{ tasks, columns, addTask, updateTask, deleteTask }}>
+    <TaskContext.Provider value={{ tasks, setTasks, columns, addTask, updateTask, deleteTask }}>
       {children}
     </TaskContext.Provider>
   );
