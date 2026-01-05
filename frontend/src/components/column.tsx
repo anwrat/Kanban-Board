@@ -1,11 +1,12 @@
-import type{ Column, Task } from "../types/types";
+import type{ Column, Task, Id } from "../types/types";
 
 interface Details{
     column: Column;
     tasks: Task[];
+    addTask: (columnId: Id)=> void;
 }
 
-export default function KanbanColumn({column,tasks}:Details){
+export default function KanbanColumn({column,tasks,addTask}:Details){
     return(
         <div className="flex flex-col">
             <div className="font-bold">{column.title}</div>
@@ -17,7 +18,9 @@ export default function KanbanColumn({column,tasks}:Details){
                     </div>
                 ))}
             </div>
-            <button className="p-3 cursor-pointer hover:bg-gray-200">+ Add Task</button>
+            <button onClick={()=>addTask(column.id)} className="p-3 cursor-pointer hover:bg-gray-200">
+                + Add Task
+            </button>
         </div>
     );
 }

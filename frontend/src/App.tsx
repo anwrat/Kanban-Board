@@ -1,5 +1,6 @@
 import KanbanColumn from "./components/column"
-import type{ Column, Task } from "./types/types"
+import type{ Column, Task,Id } from "./types/types"
+import { useState } from "react";
 
 function App() {
   const Cols: Column[] = [
@@ -7,10 +8,19 @@ function App() {
     {id: "doing", title: "In Progress"},
     {id: "done", title: "Completed"},
   ];
-  const tasks: Task[]=[
+  const [tasks,setTasks]=useState<Task[]>([
     {id:"1", columnId: "todo", content: "Complete maths assignment"},
     {id:"2", columnId: "done", content: "Science assignment", priority:"high"},
-  ];
+  ]);
+  const addTask = (columnId:Id) =>{
+    const newTask: Task = {
+      id: crypto.randomUUID(),
+      columnId: columnId,
+      content: 'Ok this is for testing',
+    };
+    setTasks([...tasks,newTask]);
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center">
       <div className="items-center mb-30 mt-10 flex flex-col">
@@ -19,7 +29,12 @@ function App() {
       </div>
       <div className="flex gap-20">
         {Cols.map((col)=>(
-          <KanbanColumn key={col.id} column={col} tasks={tasks.filter(t=> t.columnId === col.id)} />
+          <KanbanColumn 
+          key={col.id} 
+          column={col} 
+          tasks={tasks.filter(t=> t.columnId === col.id)}
+          addTask={addTask} 
+          />
         ))}
       </div>
     </div>
