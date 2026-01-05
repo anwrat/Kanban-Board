@@ -1,4 +1,4 @@
-import { TaskProvider, useTasks } from "./context/TaskContext";
+import { TaskProvider } from "./context/TaskContext";
 import Board from "./components/board";
 
 function App() {

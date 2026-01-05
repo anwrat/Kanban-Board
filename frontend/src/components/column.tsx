@@ -1,4 +1,5 @@
 import type{ Column, Task, Id } from "../types/types";
+import TaskCard from "./TaskCard";
 
 interface Details{
     column: Column;
@@ -13,9 +14,7 @@ export default function KanbanColumn({column,tasks,addTask}:Details){
             {/* Tasks */}
             <div>
                 {tasks.map((task)=>(
-                    <div key={task.id}>
-                        {task.content}
-                    </div>
+                    <TaskCard key={task.id} task={task}/>
                 ))}
             </div>
             <button 
