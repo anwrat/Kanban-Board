@@ -1,7 +1,7 @@
 import { arrayMove } from "@dnd-kit/sortable";
 import type { Task } from "../types/types";
 import { useTasks } from "../context/TaskContext";
-import KanbanColumn from "./Column";
+import KanbanColumn from "./KanbanColumn";
 import { 
   DndContext, 
   DragOverlay, 

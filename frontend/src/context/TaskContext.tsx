@@ -39,7 +39,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   }, []); 
 
   const addTask = async (columnId: Id) => {
-    const newTask: Task = { id: crypto.randomUUID(), columnId: columnId as string, content: "New Task" };
+    const newTask: Task = { id: crypto.randomUUID(), columnId: columnId as string, content: "Click to edit" };
     try {
       await api.createTask(newTask);
       setTasks(prev => [...prev, newTask]);
