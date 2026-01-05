@@ -1,17 +1,19 @@
-import { arrayMove } from "@dnd-kit/sortable";
-import type { Task } from "../types/types";
-import { useTasks } from "../context/TaskContext";
-import KanbanColumn from "./KanbanColumn";
+import { useState } from "react";
 import { 
   DndContext, 
   DragOverlay, 
   type DragEndEvent, 
+  type DragOverEvent,
   PointerSensor, 
   useSensor, 
   useSensors, 
   closestCorners 
 } from "@dnd-kit/core";
-import { useState } from "react";
+import { arrayMove } from "@dnd-kit/sortable";
+
+import type { Task } from "../types/types";
+import { useTasks } from "../context/TaskContext";
+import KanbanColumn from "./KanbanColumn";
 import TaskCard from "./TaskCard";
 import * as api from '../lib/api';
 
@@ -21,7 +23,7 @@ export default function Board() {
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: { distance: 5 },
+      activationConstraint: { distance: 10 },
     })
   );
 
@@ -29,6 +31,45 @@ export default function Board() {
     const { active } = event;
     const task = tasks.find((t) => t.id === active.id);
     if (task) setActiveTask(task);
+  }
+
+  function handleDragOver(event: DragOverEvent) {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    if (activeId === overId) return;
+
+    const activeTask = tasks.find((t) => t.id === activeId);
+    const overTask = tasks.find((t) => t.id === overId);
+
+    if (!activeTask) return;
+
+    const isOverAColumn = columns.some((col) => col.id === overId);
+
+    if (isOverAColumn && activeTask.columnId !== overId) {
+      setTasks((prev) => {
+        const activeIndex = prev.findIndex((t) => t.id === activeId);
+        const updated = [...prev];
+        updated[activeIndex] = { ...updated[activeIndex], columnId: overId as string };
+        
+        return arrayMove(updated, activeIndex, updated.length - 1);
+      });
+    }
+
+    if (overTask && activeTask.columnId !== overTask.columnId) {
+      setTasks((prev) => {
+        const activeIndex = prev.findIndex((t) => t.id === activeId);
+        const overIndex = prev.findIndex((t) => t.id === overId);
+        
+        const updated = [...prev];
+        updated[activeIndex] = { ...updated[activeIndex], columnId: overTask.columnId };
+        
+        return arrayMove(updated, activeIndex, overIndex);
+      });
+    }
   }
 
   async function handleDragEnd(event: DragEndEvent) {
@@ -40,84 +81,49 @@ export default function Board() {
     const activeId = active.id;
     const overId = over.id;
 
-    if (activeId === overId) return;
-
     const activeTask = tasks.find((t) => t.id === activeId);
     const overTask = tasks.find((t) => t.id === overId);
-    
-    let newColumnId = activeTask?.columnId;
-    
-    if (overTask) {
-        newColumnId = overTask.columnId;
-    } else {
-        newColumnId = overId as string;
-    }
 
-    if (activeTask && activeTask.columnId !== newColumnId) {
-        try {
-        await api.updateTask(activeId, { columnId: newColumnId });
-        } catch (err) {
-        console.error("Failed to save to backend:", err);
-        }
+    const newColumnId = overTask ? overTask.columnId : (overId as string);
+    if (activeTask && (activeTask.columnId !== newColumnId || activeId !== overId)) {
+      try {
+        await api.updateTask(activeId as string, { columnId: newColumnId });
+      } catch (err) {
+        console.error("Failed to sync drag with backend:", err);
+      }
     }
 
     setTasks((prev) => {
-        const activeIndex = prev.findIndex((t) => t.id === activeId);
-        const overIndex = prev.findIndex((t) => t.id === overId);
+      const activeIndex = prev.findIndex((t) => t.id === activeId);
+      const overIndex = prev.findIndex((t) => t.id === overId);
 
-        const updatedTasks = [...prev];
-        
-        updatedTasks[activeIndex] = { 
-        ...updatedTasks[activeIndex], 
-        columnId: newColumnId as string 
-        };
-
-        if (overIndex !== -1) {
-            return arrayMove(updatedTasks, activeIndex, overIndex);
-        }
-        return updatedTasks;
+      if (activeIndex !== overIndex && overIndex !== -1) {
+        return arrayMove(prev, activeIndex, overIndex);
+      }
+      return prev;
     });
-    }
-
-  function handleDragOver(event: any) {
-    const { active, over } = event;
-    if (!over) return;
-
-    const activeId = active.id;
-    const overId = over.id;
-
-    const activeTask = tasks.find((t) => t.id === activeId);
-    if (!activeTask) return;
-
-    const isOverAColumn = columns.some((col) => col.id === overId);
-
-    if (isOverAColumn) {
-      setTasks((prevTasks) => {
-        const activeIndex = prevTasks.findIndex((t) => t.id === activeId);
-        if (prevTasks[activeIndex].columnId !== overId) {
-          const updatedTasks = [...prevTasks];
-          updatedTasks[activeIndex] = { ...updatedTasks[activeIndex], columnId: overId as string };
-          return arrayMove(updatedTasks, activeIndex, activeIndex);
-        }
-        return prevTasks;
-      });
-    }
   }
 
-  if (isLoading) return <div className="flex h-screen items-center justify-center font-bold">Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <div className="animate-pulse text-xl font-semibold text-slate-400">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <DndContext 
       sensors={sensors} 
       collisionDetection={closestCorners} 
       onDragStart={handleDragStart} 
-      onDragEnd={handleDragEnd} 
       onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
     >
       <div className="min-h-screen w-full flex flex-col items-center py-10">
         <div className="items-center mb-16 flex flex-col text-center">
           <h1 className="font-bold text-6xl tracking-tight">Kanban Board</h1>
-          <p className="text-slate-500 mt-2 font-medium">by Anwesh Rawat</p>
+          <p className="text-slate-500 mt-2 font-medium italic">by Anwesh Rawat</p>
         </div>
         
         <div className="flex gap-8 px-10 overflow-x-auto w-full justify-center items-start">
@@ -132,7 +138,7 @@ export default function Board() {
         </div>
       </div>
 
-      <DragOverlay>
+      <DragOverlay dropAnimation={null}>
         {activeTask ? (
           <div className="w-80">
             <TaskCard task={activeTask} isOverlay />

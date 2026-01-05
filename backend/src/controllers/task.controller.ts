@@ -41,7 +41,7 @@ export const updateTask = async(req: Request, res: Response) =>{
     try{
         const {id} = req.params;
         const data = req.body;
-        const updatedTask = await taskModel.findOneAndUpdate({id:id as string},data);
+        const updatedTask = await taskModel.findOneAndUpdate({id:id as string},data,{new:true});
         if(!updatedTask){
             return res.status(404).json({message: "Task not found"});
         }

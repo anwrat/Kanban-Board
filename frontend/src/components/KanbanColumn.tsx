@@ -14,7 +14,7 @@ export default function KanbanColumn({ column, tasks, addTask }: Details) {
         id: column.id,
     });
   return (
-    <div ref={setNodeRef} className="flex flex-col bg-slate-200/60 w-80 min-h-125 rounded-2xl p-4 border border-slate-300 shadow-sm">
+    <div ref={setNodeRef} className="flex flex-col bg-slate-200/60 w-80 min-h-40 rounded-2xl p-4 border border-slate-300 shadow-sm">
       {/* Column Header */}
       <div className="flex items-center justify-between mb-5 px-1">
         <h2 className="font-bold text-slate-700 uppercase tracking-wider text-sm">
