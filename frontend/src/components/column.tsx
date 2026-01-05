@@ -18,7 +18,9 @@ export default function KanbanColumn({column,tasks,addTask}:Details){
                     </div>
                 ))}
             </div>
-            <button onClick={()=>addTask(column.id)} className="p-3 cursor-pointer hover:bg-gray-200">
+            <button 
+                onClick={()=>addTask(column.id)} 
+                className="rounded-md p-3 cursor-pointer hover:bg-gray-200">
                 + Add Task
             </button>
         </div>
