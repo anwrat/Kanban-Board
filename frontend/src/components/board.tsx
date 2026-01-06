@@ -85,7 +85,7 @@ export default function Board() {
     const overTask = tasks.find((t) => t.id === overId);
 
     const newColumnId = overTask ? overTask.columnId : (overId as string);
-    if (activeTask && (activeTask.columnId !== newColumnId || activeId !== overId)) {
+    if (activeTask) {
       try {
         await api.updateTask(activeId as string, { columnId: newColumnId });
       } catch (err) {
