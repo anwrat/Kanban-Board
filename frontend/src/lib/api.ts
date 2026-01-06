@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { Id, Task } from "../types/types";
 
-const BASE = "http://localhost:5001";
+const BASE = import.meta.env.VITE_BACKEND_API;
 
 const api = axios.create({
     baseURL: BASE

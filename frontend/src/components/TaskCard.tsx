@@ -56,7 +56,7 @@ export default function TaskCard({ task, isOverlay }: { task: Task, isOverlay?: 
       onClick={() => !isOverlay && setIsEditing(true)}
       className={`bg-white p-4 rounded-xl shadow-sm border border-slate-300 group flex justify-between items-start cursor-grab active:cursor-grabbing hover:border-blue-400 hover:ring-1 hover:ring-blue-400 transition-all ${overlayClasses}`}
     >
-      <p className="text-slate-700 leading-relaxed wrap-break-word overflow-hidden">{task.content}</p>
+      <p className="text-slate-700 leading-relaxed wrap-break-word line-clamp-4 overflow-hidden">{task.content}</p>
       <button
         className="text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 cursor-pointer"
         onClick={(e) => {
